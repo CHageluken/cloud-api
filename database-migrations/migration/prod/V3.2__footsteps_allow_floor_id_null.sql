@@ -1,0 +1,2 @@
+ALTER TABLE footsteps
+    ALTER COLUMN floor_id DROP NOT NULL;

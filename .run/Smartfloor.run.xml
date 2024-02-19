@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Smartfloor" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="dev" />
+    <envs>
+      <env name="POSTGRES_APP_PASSWORD" value="dev_rls" />
+      <env name="POSTGRES_APP_USER" value="rls" />
+      <env name="POSTGRES_DB" value="smartfloor" />
+      <env name="POSTGRES_HOST" value="localhost" />
+      <env name="POSTGRES_PASSWORD" value="dev" />
+      <env name="POSTGRES_USER" value="postgres" />
+    </envs>
+    <module name="smartfloor-rfid" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="smartfloor.SmartfloorRfidApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

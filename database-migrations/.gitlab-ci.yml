@@ -1,0 +1,32 @@
+stages:
+  - deploy
+
+.deploy: &deploy
+  stage: deploy
+  image: python:3.9
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud: https://gitlab.com
+  variables:
+    AWS_PROFILE: oidc
+  before_script:
+    - mkdir -p ~/.aws
+    - echo "${GITLAB_OIDC_TOKEN}" > /tmp/web_identity_token
+    - echo -e "[profile oidc]\nrole_arn=${ROLE_ARN}\nweb_identity_token_file=/tmp/web_identity_token" > ~/.aws/config
+  script:
+    - pip3 install boto3
+    - python3 ./scripts/zip_and_upload_to_s3.py ./migration $CI_COMMIT_BRANCH $BUCKET_NAME branches/
+
+zip-and-deploy-migrations-to-dev-s3:
+  <<: *deploy
+  environment:
+    name: development
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+zip-and-deploy-migrations-to-prod-s3:
+  <<: *deploy
+  environment:
+    name: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'

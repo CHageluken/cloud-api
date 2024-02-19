@@ -1,0 +1,21 @@
+-- Seed table 'avatars' with an additional set of avatars.
+INSERT INTO avatars (id, name)
+VALUES (70, 'acorn'),
+       (71, 'apple'),
+       (72, 'avocado'),
+       (73, 'banana'),
+       (74, 'cactus'),
+       (75, 'champagne'),
+       (76, 'cheese'),
+       (77, 'cherries'),
+       (78, 'chili pepper'),
+       (79, 'coconut'),
+       (80, 'coffee beans'),
+       (81, 'eggplant'),
+       (82, 'grapes'),
+       (83, 'lemon'),
+       (84, 'onion'),
+       (85, 'orange'),
+       (86, 'pineapple'),
+       (87, 'strawberry'),
+       (88, 'watermelon');

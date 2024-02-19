@@ -1,0 +1,1 @@
+ALTER TABLE groups ADD COLUMN thing_group_name text DEFAULT '';

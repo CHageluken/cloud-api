@@ -1,0 +1,1 @@
+INSERT INTO fall_events (wearable_id, timestamp, floor_id, confirmed) VALUES ('EFS33rdFF20', '2020-07-12 19:19:46.000000', 1, false);
