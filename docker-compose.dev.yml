@@ -1,0 +1,68 @@
+version: "2"
+services:
+  api-service:
+    container_name: 'smartfloor-api'
+    build: .
+    image: api-service
+    restart: always
+    depends_on:
+      - flyway
+    ports:
+      - "8000:8000" # For debugging purposes
+      - "8080:8080"
+    environment:
+      - JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n" # For debugging purposes
+      - SPRING_PROFILES_ACTIVE=dev
+      ###################################################
+      ## Uncomment the below lines if you need to test something exclusive to the production profile.
+#      - SPRING_PROFILES_ACTIVE=prod # Set production Spring profile
+#      - RDS_MIGRATION_SECRET={"host":"db","port":5432,"engine":"","username":"postgres","password":"dev","dbname":"smartfloor"}
+#      - RDS_MAIN_SECRET={"host":"db","port":5432,"engine":"","username":"rls","password":"dev_rls","dbname":"smartfloor"}
+      ###################################################
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=smartfloor
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=dev
+      - POSTGRES_APP_USER=rls
+      - POSTGRES_APP_PASSWORD=dev_rls
+      - TZ=Europe/Amsterdam
+    networks:
+      - smartfloor
+  db:
+    container_name: 'smartfloor-db'
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=smartfloor
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=dev
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+    networks:
+      - smartfloor
+  flyway:
+    image: flyway/flyway:latest
+    container_name: flyway
+    depends_on:
+      - db
+    volumes:
+      - ./database-migrations/migration/dev:/flyway/sql/dev
+      - ./database-migrations/migration/prod:/flyway/sql/prod
+    command: -url=jdbc:postgresql://db:5432/smartfloor -user=postgres -password=dev -locations=filesystem:/flyway/sql/dev,filesystem:/flyway/sql/prod migrate
+    environment:
+      WAIT_HOSTS: db:5432
+    networks:
+      - smartfloor
+volumes:
+  api-service:
+  db:
+networks:
+  smartfloor:
+    external: true

@@ -1,0 +1,4 @@
+[submodule "database-migrations"]
+	path = database-migrations
+	url = ../database-migrations.git
+    branch = master

@@ -1,0 +1,31 @@
+# IntelliJ project files
+.vscode/
+target/
+.idea
+*.iml
+out
+gen
+*.log
+.classpath
+.factorypath
+.project
+.settings/
+scripts/.vscode
+../utils/iot/certificates
+scripts/footsteps/floormaps
+**/*.pem
+
+# VS
+src/.vs
+src/test/java/smartfloor/configuration/MockPersistedUserDetailsConfig_BACKUP_1044.java
+src/test/java/smartfloor/configuration/MockPersistedUserDetailsConfig_BACKUP_1100.java
+src/test/java/smartfloor/configuration/MockPersistedUserDetailsConfig_BASE_1044.java
+src/test/java/smartfloor/configuration/MockPersistedUserDetailsConfig_BASE_1100.java
+src/test/java/smartfloor/configuration/MockPersistedUserDetailsConfig_LOCAL_1044.java
+src/test/java/smartfloor/configuration/MockPersistedUserDetailsConfig_LOCAL_1100.java
+src/test/java/smartfloor/configuration/MockPersistedUserDetailsConfig_REMOTE_1044.java
+src/test/java/smartfloor/configuration/MockPersistedUserDetailsConfig_REMOTE_1100.java
+src/test/java/smartfloor/controller/FloorControllerIntegrationTest_BACKUP_1156.java
+src/test/java/smartfloor/controller/FloorControllerIntegrationTest_BASE_1156.java
+src/test/java/smartfloor/controller/FloorControllerIntegrationTest_LOCAL_1156.java
+src/test/java/smartfloor/controller/FloorControllerIntegrationTest_REMOTE_1156.java

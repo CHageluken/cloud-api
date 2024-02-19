@@ -1,0 +1,89 @@
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+  DESIRED_AMOUNT_OF_APP_CONTAINERS: 1
+  MAVEN_CLI_OPTS: "-Dmaven.repo.local=.m2/repository --batch-mode --errors --fail-at-end --show-version"
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_FORCE_HTTPS: 1
+
+# Order of stages (jobs per stage run in parallel, stages run sequentially).
+stages:
+  - build # also includes running unit tests
+  - post-build-tasks
+  - test
+  - test-and-package
+  - deploy
+
+## (STAGE) build
+
+# (JOB) Compile application, run unit tests.
+# We cache downloaded dependencies.
+compileCodeAndRunUnitTests:
+  image: maven:3.9.6-amazoncorretto-21
+  stage: build
+  script: "mvn $MAVEN_CLI_OPTS clean compile test"
+  cache:
+    paths:
+      - .m2/repository
+
+## (STAGE) test - unit + integration tests
+
+# Run unit + integration tests (unit tests are ran by default as part of the integration-test Maven goal).
+# This job runs only during merge requests & pre deploy (dev+master) as running the integration tests takes quite a bit more time.
+runAllTests:
+  image: maven:3.9.6-amazoncorretto-21
+  stage: test
+  script: "mvn $MAVEN_CLI_OPTS integration-test"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  cache:
+    paths:
+      - .m2/repository
+
+# Run unit + integration tests and create a fat JAR of the application including all dependencies.
+# We run the unit & integration tests once more before deploying to make sure we do not have any failing tests.
+runTestsAndCreateJAR:
+  image: maven:3.9.6-amazoncorretto-21
+  stage: test-and-package
+  script: "mvn $MAVEN_CLI_OPTS clean integration-test package"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"'
+  cache:
+    paths:
+      - .m2/repository
+  artifacts:
+    paths:
+      - target/*.jar
+
+## (STAGE) deploy
+
+.deploy: &deploy
+  stage: deploy
+  image: python:3.9
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud: https://gitlab.com
+  variables:
+    AWS_PROFILE: oidc
+  before_script:
+    - mkdir -p ~/.aws
+    - echo "${GITLAB_OIDC_TOKEN}" > /tmp/web_identity_token
+    - echo -e "[profile oidc]\nrole_arn=${ROLE_ARN}\nweb_identity_token_file=/tmp/web_identity_token" > ~/.aws/config
+  script:
+    - pip3 install boto3
+    - python3 ./scripts/zip_and_upload_to_s3.py . $CI_COMMIT_BRANCH $BUCKET_NAME branches/
+
+
+zip-and-deploy-dev-to-s3:
+  <<: *deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+  environment:
+    name: development
+
+zip-and-deploy-prod-to-s3:
+  <<: *deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+  environment:
+    name: production
+  
